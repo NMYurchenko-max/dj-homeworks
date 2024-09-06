@@ -1,1 +1,2 @@
-django
+Django==5.1.1
+datetime==5.5

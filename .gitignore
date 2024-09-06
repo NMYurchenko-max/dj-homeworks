@@ -1,6 +1,7 @@
 # IDE specific
 .idea/
 .vscode/
+secret/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
