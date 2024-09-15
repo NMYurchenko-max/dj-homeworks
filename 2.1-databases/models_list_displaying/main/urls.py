@@ -16,9 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from books.views import books_view
+from books.views import books_view, books_by_date
+from django.views.generic import RedirectView
 
 urlpatterns = [
-    path('', books_view, name='books'),
+    path('', RedirectView.as_view(url='/books/', permanent=True)),  # Путь для корня сайта
+    path('books/', books_view, name='books'),
+    path('books/<str:pub_date>/', books_by_date, name='books_by_date'),
     path('admin/', admin.site.urls),
 ]
