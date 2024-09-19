@@ -13,12 +13,21 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+import debug_toolbar.urls as toolbar_urls
 
 urlpatterns = [
-    path('', include('school.urls')),
-    path('admin/', admin.site.urls),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Включение URL-паттернов из приложения 'school'
+    path("", include("school.urls")),
+    # URL для административной панели Django
+    path("admin/", admin.site.urls),
+    path("__debug__/", include(toolbar_urls)),
+    path("test/", include("school.urls")),
+]
+
+# Динамическое включение URL-паттернов для медиа-файлов
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

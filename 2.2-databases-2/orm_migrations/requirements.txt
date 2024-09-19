@@ -1,2 +1,4 @@
-django
-psycopg2-binary
+django~=5.1.1
+psycopg2-binary~=2.9.9
+logging~=0.4.9.6
+django-debug-toolbar~=4.4.6
