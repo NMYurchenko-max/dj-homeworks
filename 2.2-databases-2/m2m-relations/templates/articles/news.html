@@ -1,22 +1,19 @@
-{% extends "articles/base.html" %}
-
-{% load static %}
-
-{% block title %}Новости{% endblock %}
-
+{% extends "articles/base.html" %}  {# Наследуемся от базового шаблона #}
+{% load static %}  {# Загружаем статические файлы #}
+{% block title %}Новости{% endblock %}  {# Указываем заголовок страницы #}
 {% block content %}
-  <div class="row">
-    {% for article in object_list %}
-      <div class="col-lg-4 col-sm-6 portfolio-item">
-        <div class="card h-100">
-          <a href="#"><img class="card-img-top" src="{% get_media_prefix %}{{ article.image }}" alt=""></a>
-          <div class="card-body">
-            <h4 class="card-title">
-              <a href="#">{{ article.title }}</a>
+  <div class="row">  {# Начало контейнера для строк #}
+    {% for article in object_list %}  {# Начинаем цикл по списку статей #}
+      <div class="col-lg-4 col-sm-6 portfolio-item">  {# Колонка для статьи #}
+        <div class="card h-100">  {# Карточка для отображения статьи #}
+          <a href="#"><img class="card-img-top" src="{% get_media_prefix %}{{ article.image }}" alt=""></a>  {# Изображение статьи #}
+          <div class="card-body">  {# Тело карточки #}
+            <h4 class="card-title">  {# Заголовок статьи #}
+              <a href="#">{{ article.title }}</a>  {# Ссылка на заголовок статьи #}
             </h4>
-            <p class="card-text">{{ article.text }}</p>
-            {% for scope in article.scopes.all %}
-              <span class="badge {% if scope.is_main %}badge-primary{% else %}badge-secondary{% endif %}">{{ scope.tag.name }}</span>
+            <p class="card-text">{{ article.text }}</p>  {# Текст статьи #}
+            {% for scope in article.article_scopes.all %}  {# Цикл по тегам, связанным со статьей #}
+              <span class="badge {% if scope.is_main %}badge-primary{% else %}badge-secondary{% endif %}">{{ scope.tag.name }}</span>  {# Отображаем тег с соответствующим стилем #}
             {% endfor %}
           </div>
         </div>
@@ -24,3 +21,4 @@
     {% endfor %}
   </div>
 {% endblock %}
+  
