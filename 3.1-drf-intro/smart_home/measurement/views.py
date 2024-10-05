@@ -1,7 +1,8 @@
 """
-Этот файл содержит функциональные представления для работы с API.
+Виды представлений для работы с датчиками и измерениями.
+Эти классы определяют логику обработки HTTP-запросов для различных операций.
 """
-
+from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,115 +10,84 @@ from .models import Sensor, Measurement
 from .serializers import SensorSerializer, MeasurementSerializer
 from django.http import HttpResponse
 
-
 @api_view(["GET"])
 def api_root(request):
     """
     Корневой эндпоинт API.
-
     Возвращает информацию о доступных эндпоинтах.
     """
     return Response(
         {
             "message": "Welcome to Smart Home API!",
             "endpoints": {
-                "sensors": "/api/sensors/",
-                "measurements": "/api/measurements/",
+                "sensors": {
+                    "list": "/api/sensors/",
+                    "detail": "/api/sensors/<int:pk>/",
+                    "create": "/api/sensors/",
+                    "update": "/api/sensors/<int:pk>/",
+                    "delete": "/api/sensors/<int:pk>/",
+                },
+                "measurements": {
+                    "list": "/api/measurements/",
+                    "create": "/api/measurements/",
+                    "view-image": "/api/measurements/<int:pk>/image/",
+                },
             },
         }
     )
 
-
-@api_view(["GET", "POST"])
-def sensor_list(request):
+class SensorListCreateAPIView(generics.ListCreateAPIView):
     """
-    Эндпоинт для работы со списком датчиков.
-
-    GET: Возвращает список всех датчиков или создает новый датчик.
-    POST: Создает новый датчик.
+    Представление для работы со списком датчиков.
+    Обеспечивает CRUD-операции над списком датчиков.
     """
-    if request.method == "GET":
-        sensors = Sensor.objects.all()
-        serializer = SensorSerializer(sensors, many=True)
-        return Response(serializer.data)
+    queryset = Sensor.objects.all()
+    serializer_class = SensorSerializer
 
-    elif request.method == "POST":
-        serializer = SensorSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(["GET", "PUT", "DELETE"])
-def sensor_detail(request, pk):
+class SensorRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     """
-    Эндпоинт для работы с отдельным датчиком.
-
-    GET: Возвращает информацию о конкретном датчике.
-    PUT: Обновляет информацию о конкретном датчике.
-    DELETE: Удаляет конкретный датчик.
+    Представление для работы с отдельным датчиком.
+    Обеспечивает чтение, обновление и удаление данных о конкретном датчике.
     """
-    try:
-        sensor = Sensor.objects.get(pk=pk)
-    except Sensor.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    queryset = Sensor.objects.all()
+    serializer_class = SensorSerializer
 
-    if request.method == "GET":
-        serializer = SensorSerializer(sensor)
-        return Response(serializer.data)
-
-    elif request.method == "PUT":
-        serializer = SensorSerializer(sensor, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == "DELETE":
-        sensor.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-@api_view(["GET", "POST"])
-def measurement_list(request):
+class MeasurementListCreateAPIView(generics.ListCreateAPIView):
     """
-    Эндпоинт для работы со списком измерений.
-
-    GET: Возвращает список всех измерений или создает новое измерение.
-    POST: Создает новое измерение.
+    Представление для работы со списком измерений.
+    Обеспечивает CRUD-операции над списком измерений.
     """
-    if request.method == "GET":
-        measurements = Measurement.objects.all()
-        serializer = MeasurementSerializer(measurements, many=True)
-        return Response(serializer.data)
+    queryset = Measurement.objects.all()
+    serializer_class = MeasurementSerializer
 
-    elif request.method == "POST":
-        serializer = MeasurementSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(["GET"])
-def view_measurement_image(request, pk):
+class MeasurementRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     """
-    Эндпоинт для просмотра изображения измерения.
-
-    GET: Возвращает изображение конкретного измерения или информацию об отсутствии изображения.
+    Представление для работы с отдельным измерением.
+    Обеспечивает чтение, обновление и удаление данных о конкретном измерении.
     """
-    measurement = Measurement.objects.get(pk=pk)
+    queryset = Measurement.objects.all()
+    serializer_class = MeasurementSerializer
 
-    if measurement.image:
-        response = HttpResponse(content_type="image/jpeg")
-        response["Content-Disposition"] = (
-            f'inline; filename="measurement_{pk}.jpg"'
-        )
-        response.write(measurement.image.open().read())
-        return response
+class MeasurementImageView(generics.RetrieveAPIView):
+    """
+    Представление для просмотра изображения измерения.
+    Возвращает изображение соответствующего измерения или сообщение об ошибке.
+    """
+    queryset = Measurement.objects.all()
+    serializer_class = MeasurementSerializer
 
-    else:
-        return Response(
-            {"message": "Изображение отсутствует"}, status=status.HTTP_200_OK
-        )
+    def get(self, request, pk):
+        measurement = Measurement.objects.get(pk=pk)
+
+        if measurement.image:
+            response = HttpResponse(content_type="image/jpeg")
+            response["Content-Disposition"] = (
+                f'inline; filename="measurement_{pk}.jpg"'
+            )
+            response.write(measurement.image.open().read())
+            return response
+
+        else:
+            return Response(
+                {"message": "Изображение отсутствует"}, status=status.HTTP_200_OK
+            )
