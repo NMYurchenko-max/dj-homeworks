@@ -1,5 +1,4 @@
 """ Модуль, содержащий административное представление для статей. """
-
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.forms import BaseInlineFormSet

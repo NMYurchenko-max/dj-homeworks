@@ -12,7 +12,7 @@
               <a href="#">{{ article.title }}</a>  {# Ссылка на заголовок статьи #}
             </h4>
             <p class="card-text">{{ article.text }}</p>  {# Текст статьи #}
-            {% for scope in article.article_scopes.all %}  {# Цикл по тегам, связанным со статьей #}
+            {% for scope in article.scopes.all %}  {# Цикл по тегам, связанным со статьей #}
               <span class="badge {% if scope.is_main %}badge-primary{% else %}badge-secondary{% endif %}">{{ scope.tag.name }}</span>  {# Отображаем тег с соответствующим стилем #}
             {% endfor %}
           </div>
